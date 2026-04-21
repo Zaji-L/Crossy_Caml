@@ -1,0 +1,8 @@
+(executable
+ (name main)
+ (libraries graphics unix caml_types)
+ (modules main Game_logic Render))
+
+(library
+ (name caml_types)
+ (modules Caml_types))
