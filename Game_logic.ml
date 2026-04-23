@@ -54,3 +54,28 @@ let move_obstacles state =
     { row with obstacles = obs' }
   ) state.rows in
   { state with rows = rows' }
+
+(*Check for player collison*)
+let check_collision state =
+  let player_pos = state.player_pos in 
+  (*outer List.exists is iterating through each row in state.rows, inner iterates through each ovs in row.obstacles. When inner is true, then the whole statement returns true*)
+  let collision_detected =
+    List.exists (fun row -> 
+      List.exists (fun obs -> obs.pos = player_pos) row.obstacles
+    ) state.rows 
+  in
+  if collision_detected then {state with is_game_over = true} else state
+
+let check_goal state =
+  let goal_pos = List.init cols (fun x -> (x, 0)) in 
+  let reached_end = List.exists (fun pos -> pos = state.player_pos) goal_pos in
+
+    if reached_end then 
+      { state with
+        score = state.score + 1;
+        player_pos = (cols / 2, rows_count - 1)
+      }
+    else
+    state
+
+

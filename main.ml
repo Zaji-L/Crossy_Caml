@@ -18,18 +18,22 @@ let read_input () =
 (* game loop logic *)
 
 let rec loop state =
-  if state.is_game_over then ()
-  else begin
-    Render.render state;
-    Unix.sleepf 0.5;
-    let state' = Game_logic.apply_input (read_input ()) state in
-    let state'' = Game_logic.move_obstacles state' in 
-    loop state''
-  end
+  if state.is_game_over then 
+    let () = Printf.printf "Game Over! Final Score: %d\n" state.score in
+    Graphics.close_graph ()
+  else 
+    state
+    |> Game_logic.apply_input (read_input ())
+    |> Game_logic.move_obstacles
+    |> Game_logic.check_collision
+    |> Game_logic.check_goal
+    |> (fun next_state -> 
+         Render.render next_state;
+         Unix.sleepf 0.5;
+         loop next_state)
 
 let () =
   Graphics.open_graph (Printf.sprintf " %dx%d" win_w win_h);
   Graphics.set_window_title "Crossy Caml";
   Graphics.auto_synchronize false;
-  loop Game_logic.initial_state;
-  Graphics.close_graph ()
+  loop Game_logic.initial_state
