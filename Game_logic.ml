@@ -41,19 +41,26 @@ let initial_state = {
 }
 
 let move_obstacles state =
-  let rows' = List.map (fun row ->
+  let (p_col, p_row) = state.player_pos in
+  let new_player_col = ref p_col in
+
+  let rows' = List.mapi (fun r_idx row ->
     let obs' = List.map (fun obs ->
-      let (col, row_idx) = obs.pos in
+      let (col, _) = obs.pos in
       let col' = match obs.facing with
         | Right -> (col + 1) mod cols
         | Left  -> (col - 1 + cols) mod cols
         | _     -> col
       in
-      { obs with pos = (col', row_idx) }
+      (* If player is on this obstacle and it's a Water row (a Log), update player position *)
+      if r_idx = p_row && col = p_col && row.kind = Water then
+        new_player_col := col';
+
+      { obs with pos = (col', r_idx) }
     ) row.obstacles in
     { row with obstacles = obs' }
   ) state.rows in
-  { state with rows = rows' }
+  { state with rows = rows'; player_pos = (!new_player_col, p_row) }
 
 (*Check for player collison*)
 let check_collision state =
@@ -67,6 +74,7 @@ let check_collision state =
     | Grass -> false
   in
   if should_die then { state with is_game_over = true } else state
+
 let check_goal state =
   let goal_pos = List.init cols (fun x -> (x, 0)) in 
   let reached_end = List.exists (fun pos -> pos = state.player_pos) goal_pos in
