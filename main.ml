@@ -33,7 +33,8 @@ let rec loop state =
          loop next_state)
 
 let () =
+  Random.self_init ();
   Graphics.open_graph (Printf.sprintf " %dx%d" win_w win_h);
   Graphics.set_window_title "Crossy Caml";
   Graphics.auto_synchronize false;
-  loop Game_logic.initial_state
+  loop (Game_logic.initial_state ())
